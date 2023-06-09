@@ -10,7 +10,7 @@ function loadShader(gl, type, source) {
 }
 
 export function initGL() {
-  const canvas = document.getElementById("glCanvas");
+  const canvas = document.getElementById("Canvas");
   const gl = canvas.getContext("webgl2");
   const start = Date.now();
 
