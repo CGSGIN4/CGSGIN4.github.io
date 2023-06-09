@@ -2,12 +2,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>CGSG forever!!!</title>
+    <title>Platon bodies drawing</title>
+    <link rel="stylesheet" href="../styles/styles.css">
   </head>
   <body>
-    <h1>Platon bodies</h1>
-    <a style="text-decoration: none" href="../index.html"> back </a>
-    <div id="a1">Тег для подмены текста</div>
+    <div>
+      <h1>Platon bodies</h1>
+    </div>
+    <div>
+      <a style="text-decoration: none" href="../index.html"> back </a>
+    </div>
+    <div id="debug">
+      Some error occured...
+    </div>
     
     <div>
       <input type="radio" id="bodyChoice1" name="body" value="tetrahedron">
@@ -26,17 +33,19 @@
       <label for="bodyChoice5">Dodecahedron</label>
     </div>
 
-    <canvas
-      id="Canvas"
-      width="1002px"
-      height="1002px"
-      style="border: 1px Solid Red"
-    ></canvas>
+    <div>
+      <canvas
+        id="Canvas"
+        width="1002px"
+        height="1002px"
+        style="border: 1px Solid Red"
+      ></canvas>
+    </div>
     <script type="module">
       import { initGL } from "./render/render.js";
       window.addEventListener("load", () => {
           initGL();
-      let tag = document.getElementById("a1");
+      let tag = document.getElementById("debug");
         if (tag != null)
           tag.innerHTML = "OpenGL is initialized";
       });

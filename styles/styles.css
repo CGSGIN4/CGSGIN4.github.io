@@ -1,0 +1,76 @@
+@import "./theme.css";
+
+@font-face {
+    font-family: "Comfortaa";
+    src: url(../fonts/Comfortaa/Comfortaa-Regular.ttf);
+}
+
+@font-face {
+    font-family: "Work_sans";
+    src: url(../fonts/Work_sans/WorkSans-VariableFont_wght.ttf)
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+h1 {
+    font-family: 'Comfortaa';
+}
+
+a {
+    font-family: 'Work_sans';
+    color: var(--sub-color);
+    text-decoration: none;
+}
+
+a:hover { 
+    color: var(--main-color);
+}
+
+input[type=radio] {
+    appearance: none;
+    background-color: var(--sub-alt-color);
+    width: 1.2em;
+    height: 1.2em;
+    border: 0.2em solid var(--sub-color);
+    border-radius: 50%;
+    transform: translateY(-0.1em);
+    
+    display: inline-grid;
+    place-content: center;
+    transition: transform 0.1s ease-in-out, border-color 0.1s ease-in-out;
+
+    &:before {
+        content: "";
+        width: 0.65em;
+        height: 0.65em;
+        border-radius: 50%;
+        background-color: var(--main-color);
+        transform: scale(0);
+    }   
+    
+    &:hover {
+        border: 0.2em solid var(--main-color);
+    }
+    
+    
+    &:checked:before {
+        transform: scale(1);
+    }
+    
+}
+
+canvas {
+    background-color: #222222;
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+#debug {
+    font-family: 'consolas';
+    color: var(--dbg-color)
+}

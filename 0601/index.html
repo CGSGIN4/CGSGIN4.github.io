@@ -3,17 +3,28 @@
   <head> 
     <meta charset="UTF_8">
     <title>
-        My first page
+        Julia fractal drawing
     </title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles/styles.css">
   </head>
   <body>
-    <a href = "../index.html">back</a>
+    <div>
+      <h1>Julia fractal</h1>
+    </div>
+    <div id="debug">
+      Some error occured...
+    </div>
+    <div>
+      <a href = "../index.html">back</a>
+    </div>
     <div>
         <canvas id="glCanvas" width="800" height="600"></canvas>
         <script type="module">
             import {initGL} from './main.js'
-            initGL(); 
+            initGL();
+        let tag = document.getElementById("debug");
+          if (tag != null)
+            tag.innerHTML = "OpenGL is initialized"; 
         </script>
     </div>
   </body>
