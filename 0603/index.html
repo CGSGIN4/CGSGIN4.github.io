@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CGSG forever!!!</title>
+  </head>
+  <body>
+    <h1>Platon bodies</h1>
+    <a style="text-decoration: none" href="../index.html"> back </a>
+    <div id="a1">Тег для подмены текста</div>
+    
+    <div>
+      <input type="radio" id="bodyChoice1" name="body" value="tetrahedron">
+      <label for="bodyChoice1">Tetrahedron</label>
+
+      <input type="radio" id="bodyChoice2" name="body" value="cube" checked>
+      <label for="bodyChoice2">Cube</label>
+
+      <input type="radio" id="bodyChoice3" name="body" value="octahedron">
+      <label for="bodyChoice3">Octahedron</label>
+
+      <input type="radio" id="bodyChoice4" name="body" value="icosahedron">
+      <label for="bodyChoice4">Icosahedron</label>
+
+      <input type="radio" id="bodyChoice5" name="body" value="dodecahedron">
+      <label for="bodyChoice5">Dodecahedron</label>
+    </div>
+
+    <canvas
+      id="Canvas"
+      width="1002px"
+      height="1002px"
+      style="border: 1px Solid Red"
+    ></canvas>
+    <script type="module">
+      import { initGL } from "./render/render.js";
+      window.addEventListener("load", () => {
+          initGL();
+      let tag = document.getElementById("a1");
+        if (tag != null)
+          tag.innerHTML = "OpenGL is initialized";
+      });
+  </script>
+  </body>
+</html>
