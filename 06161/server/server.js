@@ -17,6 +17,10 @@ const clients = [];
 io.on("connection", (socket) => {
   clients.push(socket);
   console.log(`Client connected with id: ${socket.id}`);
+
+  //events
+
+  //
   socket.on("MessageToServer", (msg) => {
     const replyMsg = msg;
     console.log(replyMsg);
