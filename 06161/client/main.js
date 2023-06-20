@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
-import { GetData, InitGame } from "./game.js";
-import { ProvideData } from "./game.js";
+import { InitGame, startEvent } from "./game.js";
+import { GetData, ProvideData } from "./game.js";
 
 async function main() {
   const socket = io();
@@ -23,6 +23,10 @@ async function main() {
 
   socket.on("disconnect", () => {
     console.log(socket.id); // undefined
+  });
+
+  socket.on("event", function (id) {
+    startEvent(id);
   });
 }
 

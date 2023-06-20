@@ -28,6 +28,8 @@ let bulletObj = {
   shot,
 };
 
+let fieldBuffs = [];
+
 const colors = [
   "blue",
   "red",
@@ -125,8 +127,8 @@ export function GetData(data_buf) {
     const HtmlPlayerBullet = document.getElementById(playerbullet.Id);
     HtmlPlayerBullet.style.top = `${playerbullet.posy}px`;
     HtmlPlayerBullet.style.left = `${playerbullet.posx}px`;
-    HtmlPlayerBullet.style.transform = `rotate(${
-      ((playerbullet.angle % 360) * 180) / Math.PI
+    HtmlPlayerBullet.style.transform = `rotate(${360 - 
+      (((playerbullet.angle % 360) - 80) * 180) / Math.PI
     }deg)`;
   }
   checkOverlaps(active_bullets);
@@ -219,6 +221,7 @@ function bulletAnim(call, deg, x, y) {
     bulletObj.angle = deg;
     bulletObj.posx = x;
     bulletObj.posy = y;
+    bullet.style.transform = `rotate(${70}deg)`;
   } else if (Date.now() - shootTime <= 1000) {
     bulletObj.posx += Math.cos(bulletObj.angle) * 20;
     bulletObj.posy += Math.sin(bulletObj.angle) * 20;
@@ -232,23 +235,20 @@ function bulletAnim(call, deg, x, y) {
   }
 }
 
-function startEvent(event) {
-  let input = event.split(" ");
+export function startEvent(event) {
 
-  if (input[0] == "spawn") {
-    if (isNaN(parseInt(input[2])) || parseInt(input[2]) == undefined)
-      input[2] = getRandomInt(1030);
-    if (isNaN(parseInt(input[3])) || parseInt(input[3]) == undefined)
-      input[3] = getRandomInt(790);
-    spawn(input[1], parseInt(input[2]), parseInt(input[3]));
-  }
+  if (event == 16)
+    spawn("buff_invis");
 }
 
 function spawn(item, x, y) {
   let myitem = document.getElementById(item);
   myitem.removeAttribute("hidden");
+  if (x == undefined) x = getRandomInt(1030);
+  if (y == undefined) y = getRandomInt(790);
   myitem.style.top = `${y}px`;
   myitem.style.left = `${x}px`;
+  fieldBuffs.push(item);
 }
 
 //end of functions block

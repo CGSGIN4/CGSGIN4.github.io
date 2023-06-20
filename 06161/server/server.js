@@ -17,6 +17,7 @@ let FreeIds = [0, 1, 2, 3, 4, 5, 6, 7];
 
 let tanks = [];
 let bullets = [];
+let buffs = [];
 let data_buf = [tanks, bullets];
 
 io.on("connection", (socket) => {
@@ -45,6 +46,17 @@ io.on("connection", (socket) => {
   setInterval(function () {
     for (const client of clients) client.emit("updateRequest");
   }, 30);
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  /*
+  setInterval(function () {
+    let rand = getRandomInt(1000);
+    if (rand == 16 || other event values) for (const client of clients) client.emit("event", rand);  
+  }, 1000);
+  */
 });
 
 server.listen(process.env.PORT || 1626, () => {
