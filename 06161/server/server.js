@@ -17,8 +17,9 @@ let FreeIds = [0, 1, 2, 3, 4, 5, 6, 7];
 
 let tanks = [];
 let bullets = [];
-let buffs = [];
-let data_buf = [tanks, bullets];
+let buffs = ["buff_ricoshet", "buff_invis", "buff_anti_invis", "buff_shield"];
+let activeBuffs = [];
+let data_buf = [tanks, bullets, activeBuffs];
 
 io.on("connection", (socket) => {
   clients.push(socket);
@@ -31,6 +32,10 @@ io.on("connection", (socket) => {
   socket.on("PushData", (data) => {
     tanks[data[0].UID] = data[0];
     bullets[data[0].UID] = data[1];
+    for (const buff of data[2]) {
+      let indexa = activeBuffs.indexOf(data[2]);
+      if (indexa != -1) activeBuffs.splice(indexa, 1);
+    }
     for (const client of clients) client.emit("updateSuggest", data_buf);
   });
 
@@ -43,22 +48,26 @@ io.on("connection", (socket) => {
       tanks.splice(socket.UID, 1);
     }
   });
-  setInterval(function () {
-    for (const client of clients) client.emit("updateRequest");
-  }, 30);
-
-  function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
 
   /*
-  setInterval(function () {
-    let rand = getRandomInt(1000);
-    if (rand == 16 || other event values) for (const client of clients) client.emit("event", rand);  
-  }, 1000);
+  
   */
 });
 
 server.listen(process.env.PORT || 1626, () => {
   console.log(`Server started on port ${server.address().port} :)`);
 });
+
+setInterval(function () {
+  let rand = getRandomInt(10);
+  if (rand <= 3 && !activeBuffs.includes(buffs[rand]))
+    for (const client of clients) client.emit("event", buffs[rand]);
+}, 1000);
+
+setInterval(function () {
+  for (const client of clients) client.emit("updateRequest");
+}, 30);
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}

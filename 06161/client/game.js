@@ -1,12 +1,15 @@
+import e from "express";
+
 let angle = 0;
 let posx = 100;
 let posy = 100;
 let shootTime;
-let bulDeg, xb, yb;
+let bulDeg,
+  xb = -50,
+  yb = -50;
 let shot = 0;
 let bullet;
 let tankHtml;
-const ricoshet = document.getElementById("buff_ricoshet");
 
 let activeButtons = [];
 
@@ -29,6 +32,9 @@ let bulletObj = {
 };
 
 let fieldBuffs = [];
+let takenBuffs = [];
+let ownedBuffs = [];
+const buffs = ["buff_ricoshet", "buff_invis", "buff_anti_invis", "buff_shield"];
 
 const colors = [
   "blue",
@@ -49,6 +55,9 @@ function getRandomInt(max) {
 }
 
 var overlaps = function (m, n) {
+  if (typeof m != "object") m = document.getElementById(m);
+  if (typeof n != "object") n = document.getElementById(n);
+
   let a = {
     x: 0,
     y: 0,
@@ -102,7 +111,7 @@ async function update() {
 //functions block
 
 export function ProvideData() {
-  let data_buf = [tankObj, bulletObj];
+  let data_buf = [tankObj, bulletObj, takenBuffs];
 
   return data_buf;
 }
@@ -110,7 +119,19 @@ export function ProvideData() {
 export function GetData(data_buf) {
   let tanks = data_buf[0];
   let bullets = data_buf[1];
+  fieldBuffs = data_buf[2];
   let active_bullets = [];
+  takenBuffs = [];
+
+  for (const buff of buffs) {
+    let lbuff = document.getElementById(buff);
+    if (!fieldBuffs.includes(buff)) {
+      lbuff.setAttribute("hidden", true);
+      lbuff.style.top = -100;
+    } else {
+      lbuff.removeAttribute("hidden");
+    }
+  }
 
   for (const playertank of tanks) {
     if (playertank == null) continue;
@@ -127,8 +148,8 @@ export function GetData(data_buf) {
     const HtmlPlayerBullet = document.getElementById(playerbullet.Id);
     HtmlPlayerBullet.style.top = `${playerbullet.posy}px`;
     HtmlPlayerBullet.style.left = `${playerbullet.posx}px`;
-    HtmlPlayerBullet.style.transform = `rotate(${360 - 
-      (((playerbullet.angle % 360) - 80) * 180) / Math.PI
+    HtmlPlayerBullet.style.transform = `rotate(${
+      360 - (((playerbullet.angle % 360) - 80) * 180) / Math.PI
     }deg)`;
   }
   checkOverlaps(active_bullets);
@@ -154,10 +175,13 @@ export function InitGame(number) {
 }
 
 function checkOverlaps(bullets) {
-  //if (overlaps(tankHtml, ricoshet) || overlaps(ricoshet, bullet)) {
-  //what to do if buff collected
-  // ricoshet.setAttribute("hidden", true);
-  //}
+  for (const buff of fieldBuffs)
+    if (overlaps(tankHtml, buff) || overlaps(bullet, buff)) {
+      takenBuffs.push(buff);
+      ownedBuffs.push(buff);
+      const index = fieldBuffs.indexOf(buff);
+      fieldBuffs.splice(index, 1);
+    }
   for (const playerbullet of bullets) {
     if (
       overlaps(
@@ -223,8 +247,49 @@ function bulletAnim(call, deg, x, y) {
     bulletObj.posy = y;
     bullet.style.transform = `rotate(${70}deg)`;
   } else if (Date.now() - shootTime <= 1000) {
-    bulletObj.posx += Math.cos(bulletObj.angle) * 20;
-    bulletObj.posy += Math.sin(bulletObj.angle) * 20;
+    let dx = Math.cos(bulletObj.angle) * 20;
+    let dy = Math.sin(bulletObj.angle) * 20;
+    let newangle;
+    console.log(ownedBuffs);
+    if (ownedBuffs.includes("buff_ricoshet")) {
+      if (bulletObj.posx + dx + 20 >= 1080 || bulletObj.posx + dx + 20 <= 0) {
+        let iindex = ownedBuffs.indexOf("buff_ricoshet");
+        ownedBuffs.splice(iindex, 1);
+        dx = -dx;
+        console.log("ricoshet in x");
+
+        if (Math.abs(dx / 20) > Math.abs(dy / 20)) {
+          let tmp = Math.atan(dy / dx) * 57.29578;
+          if (dx < 0)
+            if (dy > 0) tmp = 180 + tmp;
+            else tmp = tmp - 180;
+        } else tmp = Math.atan(dx / dy) * 57.29578;
+        if (dy < 0) tmp = -90 - tmp;
+        else tmp = 90 - tmp;
+        newangle = tmp;
+      }
+      if (bulletObj.posy + dy + 20 >= 840 || bulletObj.posy + dy + 20 <= 0) {
+        let iindex = ownedBuffs.indexOf("buff_ricoshet");
+        ownedBuffs.splice(iindex, 1);
+        console.log("ricoshet in y");
+        dy = -dy;
+
+        if (Math.abs(dx / 20) > Math.abs(dy / 20)) {
+          let tmp = Math.atan(dy / dx) * 57.29578;
+          if (dx < 0)
+            if (dy > 0) tmp = 180 + tmp;
+            else tmp = tmp - 180;
+        } else tmp = Math.atan(dx / dy) * 57.29578;
+        if (dy < 0) tmp = -90 - tmp;
+        else tmp = 90 - tmp;
+        newangle = tmp;
+      }
+    }
+
+    if (newangle != undefined) bulletObj.angle = newangle;
+
+    bulletObj.posx += dx;
+    bulletObj.posy += dy;
     bullet.style.top = `${bulletObj.posy + 20}px`;
     bullet.style.left = `${bulletObj.posx + 20}px`;
   } else {
@@ -236,12 +301,10 @@ function bulletAnim(call, deg, x, y) {
 }
 
 export function startEvent(event) {
-
-  if (event == 16)
-    spawn("buff_invis");
+  if (event <= 3) spawn(buffs[event], true);
 }
 
-function spawn(item, x, y) {
+function spawn(item, collectable, x, y) {
   let myitem = document.getElementById(item);
   myitem.removeAttribute("hidden");
   if (x == undefined) x = getRandomInt(1030);
