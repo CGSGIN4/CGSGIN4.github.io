@@ -9,6 +9,7 @@ let shot = 0;
 let bullet;
 let tankHtml;
 let shieldTime;
+let invisTime;
 
 let activeButtons = [];
 
@@ -110,6 +111,13 @@ async function update() {
 //functions block
 
 export function ProvideData() {
+  if (invisTime == undefined || Date.now() - invisTime >= 10000) {
+    let indexi = tankObj.Buffs.indexOf("buff_invis");
+    tankObj.Buffs.splice(indexi, 1);
+    invisTime = undefined;
+    indexi = ownedBuffs.indexOf("buff_invis");
+    ownedBuffs.splice(indexi, 1);
+  }
   let data_buf = [tankObj, bulletObj, takenBuffs];
 
   return data_buf;
@@ -133,13 +141,19 @@ export function GetData(data_buf) {
   }
 
   for (const playertank of tanks) {
-    if (playertank == null) continue;
+    if (playertank == null || playertank.Id == tankObj.Id) continue;
     const HtmlPlayerTank = document.getElementById(playertank.Id);
     HtmlPlayerTank.style.top = `${playertank.posy}px`;
     HtmlPlayerTank.style.left = `${playertank.posx}px`;
     HtmlPlayerTank.style.transform = `rotate(${
       ((playertank.angle % 360) * 180) / Math.PI
     }deg)`;
+    if (
+      playertank.Buffs.includes("buff_invis") &&
+      !tankObj.Buffs.includes("buff_anti_invis")
+    )
+      HtmlPlayerTank.setAttribute("hidden", true);
+    else HtmlPlayerTank.removeAttribute("hidden");
   }
   for (const playerbullet of bullets) {
     if (playerbullet == null || playerbullet.shot == 0) continue;
@@ -160,6 +174,8 @@ export function InitGame(number) {
   tankObj.posx = posx;
   tankObj.posy = posy;
   tankObj.angle = angle;
+  tankObj.Buffs = [];
+  ownedBuffs = [];
 
   bulletObj.Id = colors[number] + "bullet";
   bulletObj.posx = xb;
@@ -178,6 +194,13 @@ function checkOverlaps(bullets) {
     if (overlaps(tankHtml, buff) || overlaps(bullet, buff)) {
       takenBuffs.push(buff);
       if (!ownedBuffs.includes(buff)) ownedBuffs.push(buff);
+      if (
+        (buff == "buff_invis" || buff == "buff_anti_invis") &&
+        !tankObj.Buffs.includes(buff)
+      ) {
+        tankObj.Buffs.push(buff);
+        if (buff == "buff_invis") invisTime = Date.now();
+      }
       const index = fieldBuffs.indexOf(buff);
       fieldBuffs.splice(index, 1);
     }
@@ -197,6 +220,9 @@ function checkOverlaps(bullets) {
         tankObj.posx = 700;
         tankObj.posy = 700;
         shieldTime = undefined;
+        invisTime = undefined;
+        ownedBuffs = [];
+        tankObj.Buffs = [];
       } else {
         shieldTime = Date.now();
         ownedBuffs.splice(indexs, 1);

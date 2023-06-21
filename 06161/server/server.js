@@ -71,7 +71,7 @@ setInterval(function () {
 
 setInterval(function () {
   for (const client of clients) client.emit("updateRequest");
-}, 30);
+}, 15);
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
