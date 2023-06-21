@@ -48,11 +48,6 @@ const colors = [
 ];
 
 //help functions block
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
 
 var overlaps = function (m, n) {
   if (typeof m != "object") m = document.getElementById(m);
@@ -116,7 +111,10 @@ export function ProvideData() {
     tankObj.Buffs.splice(indexi, 1);
     invisTime = undefined;
     indexi = ownedBuffs.indexOf("buff_invis");
-    ownedBuffs.splice(indexi, 1);
+    if (indexi != -1) {
+      ownedBuffs.splice(indexi, 1);
+      console.log("spliced invis because timeout");
+    }
   }
   let data_buf = [tankObj, bulletObj, takenBuffs];
 
@@ -176,6 +174,7 @@ export function InitGame(number) {
   tankObj.angle = angle;
   tankObj.Buffs = [];
   ownedBuffs = [];
+  console.log("cleared ownedBuffs on init");
 
   bulletObj.Id = colors[number] + "bullet";
   bulletObj.posx = xb;
@@ -194,15 +193,15 @@ function checkOverlaps(bullets) {
     if (overlaps(tankHtml, buff) || overlaps(bullet, buff)) {
       takenBuffs.push(buff);
       if (!ownedBuffs.includes(buff)) ownedBuffs.push(buff);
+      if (buff == "buff_invis") invisTime = Date.now();
       if (
         (buff == "buff_invis" || buff == "buff_anti_invis") &&
         !tankObj.Buffs.includes(buff)
-      ) {
+      )
         tankObj.Buffs.push(buff);
-        if (buff == "buff_invis") invisTime = Date.now();
-      }
       const index = fieldBuffs.indexOf(buff);
       fieldBuffs.splice(index, 1);
+      console.log(ownedBuffs);
     }
   for (const playerbullet of bullets) {
     if (
@@ -222,10 +221,12 @@ function checkOverlaps(bullets) {
         shieldTime = undefined;
         invisTime = undefined;
         ownedBuffs = [];
+        console.log("cleared because dead");
         tankObj.Buffs = [];
       } else {
         shieldTime = Date.now();
         ownedBuffs.splice(indexs, 1);
+        console.log("spliced because of got hit");
       }
     }
   }
@@ -288,18 +289,17 @@ function bulletAnim(call, deg, x, y) {
   } else if (Date.now() - shootTime <= 1000) {
     let dx = Math.cos(bulletObj.angle) * 20;
     let dy = Math.sin(bulletObj.angle) * 20;
-    console.log(ownedBuffs);
     if (ownedBuffs.includes("buff_ricoshet")) {
       if (bulletObj.posx + dx >= 1820 || bulletObj.posx + dx <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
+        console.log("spliced ricoshet because of x ricoshet");
         dx = -dx;
-        console.log("ricoshet in x");
         bulletObj.angle = findNewAngle(dy / 20, dx / 20);
       } else if (bulletObj.posy + dy >= 840 || bulletObj.posy + dy <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
-        console.log("ricoshet in y");
+        console.log("spliced ricoshet because of y ricoshet");
         dy = -dy;
         bulletObj.angle = findNewAngle(dy / 20, dx / 20);
       }
@@ -317,17 +317,15 @@ function bulletAnim(call, deg, x, y) {
 }
 
 export function startEvent(event, x, y) {
-  console.log(event + "is going to spawn");
-  if (event <= 3) spawn(buffs[event], true, x, y);
+  if (event <= 3) spawn(buffs[event], x, y);
 }
 
-function spawn(item, collectable, x, y) {
+function spawn(item, x, y) {
   let myitem = document.getElementById(item);
   myitem.removeAttribute("hidden");
   myitem.style.top = `${y}px`;
   myitem.style.left = `${x}px`;
   fieldBuffs.push(item);
-  console.log(item + "spawned");
 }
 
 //end of functions block
