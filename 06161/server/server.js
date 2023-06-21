@@ -17,7 +17,7 @@ let FreeIds = [0, 1, 2, 3, 4, 5, 6, 7];
 
 let tanks = [];
 let bullets = [];
-let buffs = ["buff_ricoshet", "buff_invis", "buff_anti_invis", "buff_shield"];
+const buffs = ["buff_ricoshet", "buff_invis", "buff_anti_invis", "buff_shield"];
 let activeBuffs = [];
 let data_buf = [tanks, bullets, activeBuffs];
 
@@ -33,7 +33,7 @@ io.on("connection", (socket) => {
     tanks[data[0].UID] = data[0];
     bullets[data[0].UID] = data[1];
     for (const buff of data[2]) {
-      let indexa = activeBuffs.indexOf(data[2]);
+      let indexa = activeBuffs.indexOf(buff);
       if (indexa != -1) activeBuffs.splice(indexa, 1);
     }
     for (const client of clients) client.emit("updateSuggest", data_buf);
@@ -60,8 +60,13 @@ server.listen(process.env.PORT || 1626, () => {
 
 setInterval(function () {
   let rand = getRandomInt(10);
-  if (rand <= 3 && !activeBuffs.includes(buffs[rand]))
-    for (const client of clients) client.emit("event", buffs[rand]);
+  console.log(buffs[rand]);
+  if (rand <= 3 && !activeBuffs.includes(buffs[rand])) {
+    let x = getRandomInt(1770);
+    let y = getRandomInt(790);
+    for (const client of clients) client.emit("event", rand, x, y);
+    activeBuffs.push(buffs[rand]);
+  }
 }, 1000);
 
 setInterval(function () {

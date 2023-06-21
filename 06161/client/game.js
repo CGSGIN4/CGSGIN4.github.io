@@ -1,15 +1,14 @@
-import e from "express";
-
 let angle = 0;
 let posx = 100;
 let posy = 100;
 let shootTime;
-let bulDeg,
+let bulDeg = 0,
   xb = -50,
   yb = -50;
 let shot = 0;
 let bullet;
 let tankHtml;
+let shieldTime;
 
 let activeButtons = [];
 
@@ -178,7 +177,7 @@ function checkOverlaps(bullets) {
   for (const buff of fieldBuffs)
     if (overlaps(tankHtml, buff) || overlaps(bullet, buff)) {
       takenBuffs.push(buff);
-      ownedBuffs.push(buff);
+      if (!ownedBuffs.includes(buff)) ownedBuffs.push(buff);
       const index = fieldBuffs.indexOf(buff);
       fieldBuffs.splice(index, 1);
     }
@@ -190,8 +189,18 @@ function checkOverlaps(bullets) {
       ) &&
       tankObj.Id.slice(0, -4) != playerbullet.Id.slice(0, -6)
     ) {
-      tankObj.posx = 700;
-      tankObj.posy = 700;
+      let indexs = ownedBuffs.indexOf("buff_shield");
+      if (
+        indexs == -1 &&
+        (shieldTime == undefined || Date.now() - shieldTime >= 200)
+      ) {
+        tankObj.posx = 700;
+        tankObj.posy = 700;
+        shieldTime = undefined;
+      } else {
+        shieldTime = Date.now();
+        ownedBuffs.splice(indexs, 1);
+      }
     }
   }
 }
@@ -237,61 +246,42 @@ function updateTank() {
   }deg)`;
 }
 
+function findNewAngle(sin, cos) {
+  return (Math.atan2(sin, cos) * 180) / Math.PI;
+}
+
 function bulletAnim(call, deg, x, y) {
   if (call == 0) {
     bulletObj.shot = 1;
     bullet.removeAttribute("hidden");
     shootTime = Date.now();
     bulletObj.angle = deg;
-    bulletObj.posx = x;
-    bulletObj.posy = y;
+    bulletObj.posx = x + 20;
+    bulletObj.posy = y + 20;
     bullet.style.transform = `rotate(${70}deg)`;
   } else if (Date.now() - shootTime <= 1000) {
     let dx = Math.cos(bulletObj.angle) * 20;
     let dy = Math.sin(bulletObj.angle) * 20;
-    let newangle;
     console.log(ownedBuffs);
     if (ownedBuffs.includes("buff_ricoshet")) {
-      if (bulletObj.posx + dx + 20 >= 1080 || bulletObj.posx + dx + 20 <= 0) {
+      if (bulletObj.posx + dx >= 1820 || bulletObj.posx + dx <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
         dx = -dx;
         console.log("ricoshet in x");
-
-        if (Math.abs(dx / 20) > Math.abs(dy / 20)) {
-          let tmp = Math.atan(dy / dx) * 57.29578;
-          if (dx < 0)
-            if (dy > 0) tmp = 180 + tmp;
-            else tmp = tmp - 180;
-        } else tmp = Math.atan(dx / dy) * 57.29578;
-        if (dy < 0) tmp = -90 - tmp;
-        else tmp = 90 - tmp;
-        newangle = tmp;
-      }
-      if (bulletObj.posy + dy + 20 >= 840 || bulletObj.posy + dy + 20 <= 0) {
+        bulletObj.angle = findNewAngle(dy / 20, dx / 20);
+      } else if (bulletObj.posy + dy >= 840 || bulletObj.posy + dy <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
         console.log("ricoshet in y");
         dy = -dy;
-
-        if (Math.abs(dx / 20) > Math.abs(dy / 20)) {
-          let tmp = Math.atan(dy / dx) * 57.29578;
-          if (dx < 0)
-            if (dy > 0) tmp = 180 + tmp;
-            else tmp = tmp - 180;
-        } else tmp = Math.atan(dx / dy) * 57.29578;
-        if (dy < 0) tmp = -90 - tmp;
-        else tmp = 90 - tmp;
-        newangle = tmp;
+        bulletObj.angle = findNewAngle(dy / 20, dx / 20);
       }
     }
-
-    if (newangle != undefined) bulletObj.angle = newangle;
-
     bulletObj.posx += dx;
     bulletObj.posy += dy;
-    bullet.style.top = `${bulletObj.posy + 20}px`;
-    bullet.style.left = `${bulletObj.posx + 20}px`;
+    bullet.style.top = `${bulletObj.posy}px`;
+    bullet.style.left = `${bulletObj.posx}px`;
   } else {
     bulletObj.shot = 0;
     bullet.setAttribute("hidden", true);
@@ -300,18 +290,18 @@ function bulletAnim(call, deg, x, y) {
   }
 }
 
-export function startEvent(event) {
-  if (event <= 3) spawn(buffs[event], true);
+export function startEvent(event, x, y) {
+  console.log(event + "is going to spawn");
+  if (event <= 3) spawn(buffs[event], true, x, y);
 }
 
 function spawn(item, collectable, x, y) {
   let myitem = document.getElementById(item);
   myitem.removeAttribute("hidden");
-  if (x == undefined) x = getRandomInt(1030);
-  if (y == undefined) y = getRandomInt(790);
   myitem.style.top = `${y}px`;
   myitem.style.left = `${x}px`;
   fieldBuffs.push(item);
+  console.log(item + "spawned");
 }
 
 //end of functions block

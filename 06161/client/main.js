@@ -25,8 +25,8 @@ async function main() {
     console.log(socket.id); // undefined
   });
 
-  socket.on("event", function (id) {
-    startEvent(id);
+  socket.on("event", function (id, x, y) {
+    startEvent(id, x, y);
   });
 }
 
