@@ -10,6 +10,8 @@ let bullet;
 let tankHtml;
 let shieldTime;
 let invisTime;
+let killer;
+let killTime;
 
 let activeButtons = [];
 
@@ -79,6 +81,11 @@ var overlaps = function (m, n) {
 
   return (s1 && s2) || (s3 && s4) || (s1 && s4) || (s3 && s2);
 };
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
 //end of help functions block
 
 //event listeners block
@@ -113,11 +120,11 @@ export function ProvideData() {
     indexi = ownedBuffs.indexOf("buff_invis");
     if (indexi != -1) {
       ownedBuffs.splice(indexi, 1);
-      console.log("spliced invis because timeout");
     }
   }
-  let data_buf = [tankObj, bulletObj, takenBuffs];
+  let data_buf = [tankObj, bulletObj, takenBuffs, killer];
 
+  console.log(tankObj.UID, ": ", killer);
   return data_buf;
 }
 
@@ -125,8 +132,20 @@ export function GetData(data_buf) {
   let tanks = data_buf[0];
   let bullets = data_buf[1];
   fieldBuffs = data_buf[2];
+  let killers = data_buf[3];
+  console.log("killers this frame:", killers);
   let active_bullets = [];
   takenBuffs = [];
+  killer = undefined;
+
+  if (killers != undefined) {
+    for (const killer of killers) {
+      if (killer == null) continue;
+      console.log("killer: " + killer);
+      document.getElementById(killer).innerHTML =
+        parseInt(document.getElementById(killer).innerHTML) + 1;
+    }
+  }
 
   for (const buff of buffs) {
     let lbuff = document.getElementById(buff);
@@ -148,7 +167,7 @@ export function GetData(data_buf) {
     }deg)`;
     if (
       playertank.Buffs.includes("buff_invis") &&
-      !tankObj.Buffs.includes("buff_anti_invis")
+      !ownedBuffs.includes("buff_anti_invis")
     )
       HtmlPlayerTank.setAttribute("hidden", true);
     else HtmlPlayerTank.removeAttribute("hidden");
@@ -174,7 +193,6 @@ export function InitGame(number) {
   tankObj.angle = angle;
   tankObj.Buffs = [];
   ownedBuffs = [];
-  console.log("cleared ownedBuffs on init");
 
   bulletObj.Id = colors[number] + "bullet";
   bulletObj.posx = xb;
@@ -201,7 +219,6 @@ function checkOverlaps(bullets) {
         tankObj.Buffs.push(buff);
       const index = fieldBuffs.indexOf(buff);
       fieldBuffs.splice(index, 1);
-      console.log(ownedBuffs);
     }
   for (const playerbullet of bullets) {
     if (
@@ -214,19 +231,21 @@ function checkOverlaps(bullets) {
       let indexs = ownedBuffs.indexOf("buff_shield");
       if (
         indexs == -1 &&
-        (shieldTime == undefined || Date.now() - shieldTime >= 200)
+        (shieldTime == undefined || Date.now() - shieldTime >= 200) &&
+        (Date.now() - killTime >= 200 || killTime == undefined)
       ) {
-        tankObj.posx = 700;
-        tankObj.posy = 700;
+        killTime = Date.now();
+        killer = playerbullet.Id.slice(0, -6) + "Score";
+        console.log("killer: ", killer);
+        tankObj.posx = getRandomInt(1800);
+        tankObj.posy = getRandomInt(820);
         shieldTime = undefined;
         invisTime = undefined;
         ownedBuffs = [];
-        console.log("cleared because dead");
         tankObj.Buffs = [];
       } else {
         shieldTime = Date.now();
         ownedBuffs.splice(indexs, 1);
-        console.log("spliced because of got hit");
       }
     }
   }
@@ -293,13 +312,11 @@ function bulletAnim(call, deg, x, y) {
       if (bulletObj.posx + dx >= 1820 || bulletObj.posx + dx <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
-        console.log("spliced ricoshet because of x ricoshet");
         dx = -dx;
         bulletObj.angle = findNewAngle(dy / 20, dx / 20);
       } else if (bulletObj.posy + dy >= 840 || bulletObj.posy + dy <= 0) {
         let iindex = ownedBuffs.indexOf("buff_ricoshet");
         ownedBuffs.splice(iindex, 1);
-        console.log("spliced ricoshet because of y ricoshet");
         dy = -dy;
         bulletObj.angle = findNewAngle(dy / 20, dx / 20);
       }
