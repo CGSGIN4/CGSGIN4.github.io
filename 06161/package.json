@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.html",
   "scripts": {
-    "build-client": "./node_modules/.bin/rollup -c --watch",
+    "build-client": "06161/node_modules/.bin/rollup -c",
     "start-server": "cd dist && node ../server/server.js"
   },
   "keywords": [],
